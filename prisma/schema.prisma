@@ -1,0 +1,107 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo Utente
+model Utente {
+  id            String    @id @default(uuid())
+  nome          String
+  dataNascimento DateTime?
+  sexo          String?
+  contacto      String?
+  localizacao   String?
+  idLocal       String?   // Relacionamento com Zona
+  zona          Zona?     @relation(fields: [idLocal], references: [id]) // Relação opcional 1:N com Zona
+  consultas     Consulta[] // Relação 1:N com Consulta
+  leituras      LeituraClinica[] // Relação 1:N com LeituraClinica
+  triagens      Triagem[] // Relação 1:N com Triagem
+  notificacoes  Notificacao[] // Relação 1:N com Notificacao
+}
+
+// Modelo Consulta
+model Consulta {
+  id              String    @id @default(uuid())
+  utenteId        String
+  profissionalId  String?
+  tipo            String    // ex.: triagem/teleconsulta/presencial
+  data            DateTime
+  resumo          String?
+  prescricaoId    String?   @unique // Para relação 1:1 com Prescricao
+  utente          Utente    @relation(fields: [utenteId], references: [id])
+  prescricao      Prescricao? @relation // Relação 1:1 (sem fields/references aqui)
+}
+
+// Modelo LeituraClinica
+model LeituraClinica {
+  id           String    @id @default(uuid())
+  utenteId     String
+  tipo         String    // ex.: PA/glicemia/peso
+  valor        Float
+  dataHora     DateTime  @default(now())
+  inseridoPor  String?
+  utente       Utente    @relation(fields: [utenteId], references: [id])
+}
+
+// Modelo Prescricao
+model Prescricao {
+  id           String    @id @default(uuid())
+  consultaId   String    @unique // Para relação 1:1 com Consulta
+  medicamento  String
+  dosagem      String
+  duracao      String?
+  observacoes  String?
+  consulta     Consulta  @relation(fields: [consultaId], references: [id]) // Define relação aqui
+}
+
+// Modelo Triagem
+model Triagem {
+  id            String    @id @default(uuid())
+  utenteId      String
+  respostasJson String    // JSON para respostas do questionário
+  resultado     String
+  recomendacao  String?
+  data          DateTime  @default(now())
+  utente        Utente    @relation(fields: [utenteId], references: [id])
+}
+
+// Modelo Notificacao
+model Notificacao {
+  id          String    @id @default(uuid())
+  utenteId    String
+  tipo        String
+  mensagem    String
+  enviadoEm   DateTime  @default(now())
+  status      String?
+  utente      Utente    @relation(fields: [utenteId], references: [id])
+}
+
+// Modelo Auditoria
+model Auditoria {
+  id          String    @id @default(uuid())
+  entidade    String    // ex.: Utente, Consulta
+  entidadeId  String
+  acao        String    // ex.: create, update, delete
+  userId      String?
+  timestamp   DateTime  @default(now())
+  detalhe     String?
+}
+
+// Modelo Zona
+model Zona {
+  id          String    @id @default(uuid())
+  nome        String
+  coordenadas String?   // Para análise geográfica (ex.: GeoJSON)
+  utentes     Utente[]  // Relação 1:N com Utente
+}
