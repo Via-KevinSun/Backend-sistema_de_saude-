@@ -1,5 +1,6 @@
 const Usuario = require('../entities/Usuario');
 const Auditoria = require('../entities/Auditoria');
+const bcrypt = require('bcrypt');
 
 class CriarUsuario {
   constructor({ usuarioRepository, auditoriaRepository }) {
@@ -8,6 +9,7 @@ class CriarUsuario {
   }
 
   async execute({ nome, email, senha, papel, mfaSecret }, userId) {
+    const hashedSenha = senha ? await bcrypt.hash(senha, 10) : null;
     // Validar email único
     const usuarioExistente = await this.usuarioRepository.findByEmail(email);
     if (usuarioExistente) throw new Error('Email já registrado');
@@ -17,7 +19,7 @@ class CriarUsuario {
       id: require('crypto').randomUUID(),
       nome,
       email,
-      senha, // Será encriptada no repositório
+      senha: hashedSenha, // Será encriptada no repositório
       papel,
       mfaSecret
     });

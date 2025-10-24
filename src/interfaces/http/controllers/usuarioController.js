@@ -26,12 +26,12 @@ async function login(req, res) {
     const { email, senha } = req.body;
     const usuario = await usuarioRepository.findByEmail(email);
     if (!usuario) {
-      return res.status(401).json({ error: 'Credenciais inválidas' });
+      return res.status(401).json({ error: 'Credenciais inválidas 1' });
     }
 
     const senhaValida = await bcrypt.compare(senha, usuario.senha);
     if (!senhaValida) {
-      return res.status(401).json({ error: 'Credenciais inválidas' });
+     return res.status(401).json({ error: 'Credenciais inválidas 2' });
     }
 
     // Gerar token JWT

@@ -34,10 +34,11 @@ model Utente {
   nome           String
   dataNascimento DateTime?
   sexo           String?
-  contacto       String?
+  contacto       String?          @unique
   localizacao    String?
   idLocal        String? // Relacionamento com Zona
   zona           Zona?            @relation(fields: [idLocal], references: [id]) // Relação opcional 1:N com Zona
+  senha          String? 
   consultas      Consulta[] // Relação 1:N com Consulta
   leituras       LeituraClinica[] // Relação 1:N com LeituraClinica
   triagens       Triagem[] // Relação 1:N com Triagem

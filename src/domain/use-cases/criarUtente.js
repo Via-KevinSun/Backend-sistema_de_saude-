@@ -1,5 +1,6 @@
 const Utente = require('../entities/Utente');
 const Auditoria = require('../entities/Auditoria');
+const bcrypt = require('bcrypt');
 
 class CriarUtente {
   constructor({ utenteRepository, auditoriaRepository }) {
@@ -7,7 +8,9 @@ class CriarUtente {
     this.auditoriaRepository = auditoriaRepository;
   }
 
-  async execute({ nome, dataNascimento, sexo, contacto, localizacao, idLocal }, userId) {
+  
+  async execute({ nome, dataNascimento, sexo, contacto, localizacao, idLocal, senha }, userId) {
+    const hashedSenha = senha ? await bcrypt.hash(senha, 10) : null;
     // Criar entidade Utente com validações
     const utente = new Utente({
       id: require('crypto').randomUUID(), // Gera UUID para o ID
@@ -16,7 +19,8 @@ class CriarUtente {
       sexo,
       contacto,
       localizacao,
-      idLocal
+      idLocal, 
+      senha: hashedSenha
     });
 
     // Salvar no repositório
