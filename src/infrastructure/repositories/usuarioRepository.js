@@ -26,6 +26,13 @@ class UsuarioRepository extends IUsuarioRepository {
   async findById(id) {
     return await prisma.usuario.findUnique({ where: { id } });
   }
+
+  async delete(id) {
+  return await prisma.usuario.delete({
+    where: { id },
+  });
+}
+
 }
 
 module.exports = UsuarioRepository;

@@ -14,6 +14,23 @@ class PrescricaoRepository extends IPrescricaoRepository {
       }
     });
   }
+
+  async findAll() {
+  return await prisma.prescricao.findMany({
+    include: {
+      consulta: {
+        include: {
+          utente: { select: { id: true, nome: true } }
+        }
+      }
+    },
+    orderBy: { dataCriacao: 'desc' }
+  });
 }
 
+
+}
+
+
+  
 module.exports = PrescricaoRepository;

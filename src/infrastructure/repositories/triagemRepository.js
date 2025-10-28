@@ -10,7 +10,7 @@ class TriagemRepository extends ITriagemRepository {
         respostasJson: triagem.respostasJson,
         resultado: triagem.resultado,
         recomendacao: triagem.recomendacao,
-        data: triagem.data
+        data: new Date()
       }
     });
   }
@@ -27,6 +27,25 @@ class TriagemRepository extends ITriagemRepository {
           gte: new Date(periodoInicio),
           lte: new Date(periodoFim)
         }
+      }
+    });
+  }
+
+  async findAll() {
+    return await prisma.triagem.findMany({
+      include: {
+        utente: {
+          select: {
+            id: true,
+            nome: true,
+            dataNascimento: true,
+            sexo: true,
+            contacto: true
+          }
+        }
+      },
+      orderBy: {
+        data: 'desc' 
       }
     });
   }

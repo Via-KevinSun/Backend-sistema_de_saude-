@@ -47,4 +47,39 @@ async function login(req, res) {
   }
 }
 
-module.exports = { criarUsuario, login };
+async function eliminarUsuario(req, res) {
+  try {
+    const { id } = req.params;
+
+    // Verifica se o usuário existe
+    const usuario = await usuarioRepository.findById(id);
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+
+    // Impede que o gestor apague a si mesmo
+    if (req.usuario.id === id) {
+      return res.status(400).json({ error: 'Não pode eliminar a si próprio' });
+    }
+
+    // Elimina o usuário
+    await usuarioRepository.delete(id);
+
+    // Registra auditoria
+    await auditoriaRepository.create({
+      id: require('crypto').randomUUID(),
+      entidade: 'Usuario',
+      entidadeId: id,
+      acao: 'delete',
+      userId: req.usuario.id,
+      detalhe: `Usuário ${usuario.nome} eliminado pelo gestor ${req.usuario.nome}`
+    });
+
+    res.json({ message: 'Usuário eliminado com sucesso' });
+  } catch (error) {
+    console.error('Erro ao eliminar usuário:', error);
+    res.status(500).json({ error: 'Erro ao eliminar usuário' });
+  }
+}
+
+module.exports = { criarUsuario, login, eliminarUsuario };

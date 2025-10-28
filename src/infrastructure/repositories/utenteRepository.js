@@ -43,7 +43,28 @@ class UtenteRepository extends IUtenteRepository {
     });
   }
 
+  
+  async delete(id) {
+    return await prisma.utente.delete({ where: { id } });
+  }
+
+  async update(id, data) {
+  return await prisma.utente.update({
+    where: { id },
+    data: {
+      nome: data.nome,
+      dataNascimento: data.dataNascimento,
+      sexo: data.sexo,
+      contacto: data.contacto,
+      localizacao: data.localizacao,
+      idLocal: data.idLocal,
+    },
+  });
 }
+
+}
+
+
 
 module.exports = UtenteRepository;
 //module.exports = {findByContacto} ;

@@ -41,6 +41,16 @@ class ConsultaRepository extends IConsultaRepository {
   async findUtenteById(utenteId) {
     return await prisma.utente.findUnique({ where: { id: utenteId } });
   }
+
+   async findAll() {
+    return await prisma.consulta.findMany({
+      include: {
+        utente: { select: { id: true, nome: true, contacto: true } },
+        // Inclua profissional se tiver modelo Usuario/Profissional
+      },
+      orderBy: { data: 'desc' }
+    });
+  }
 }
 
 module.exports = ConsultaRepository;

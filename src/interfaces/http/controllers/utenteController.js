@@ -1,4 +1,5 @@
 const CriarUtente = require('../../../domain/use-cases/criarUtente');
+const EditarUtente = require('../../../domain/use-cases/editarUtente');
 const UtenteRepository = require('../../../infrastructure/repositories/utenteRepository');
 const AuditoriaRepository = require('../../../infrastructure/repositories/auditoriaRepository');
 // const Utente = require('../../../domain/entities/Utente');
@@ -6,11 +7,12 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken'); 
 
 
-
-
 const utenteRepository = new UtenteRepository();
 const auditoriaRepository = new AuditoriaRepository();
 const criarUtenteUseCase = new CriarUtente({ utenteRepository, auditoriaRepository });
+const editarUtenteUseCase = new EditarUtente({ utenteRepository, auditoriaRepository });
+
+
 //Cadastro de um Utente
 async function criarUtente(req, res) {
   try {
@@ -88,6 +90,55 @@ async function listarPerfil(req, res) {
   }
 }
 
+async function eliminarUtente(req, res) {
+  try {
+    const { id } = req.params;
 
-module.exports = { criarUtente, loginUtente, listarUtentes,listarPerfil  };
+    // Verifica se o utente existe
+    const utente = await utenteRepository.findById(id);
+    if (!utente) {
+      return res.status(404).json({ error: 'Utente não encontrado' });
+    }
+
+    // Elimina o utente
+    await utenteRepository.delete(id);
+
+    // Registra na auditoria
+    await auditoriaRepository.create({
+      id: require('crypto').randomUUID(),
+      entidade: 'Utente',
+      entidadeId: id,
+      acao: 'delete',
+      userId: req.usuario.id,
+      detalhe: `Utente ${utente.nome} eliminado pelo gestor ${req.usuario.nome}`
+    });
+
+    res.json({ message: 'Utente eliminado com sucesso' });
+  } catch (error) {
+    console.error('Erro ao eliminar utente:', error);
+    res.status(500).json({ error: 'Erro ao eliminar utente' });
+  }
+}
+
+async function editarUtente(req, res) {
+  try {
+    const { id } = req.params;
+    const dados = req.body;
+
+    const utenteAtualizado = await editarUtenteUseCase.execute(
+      id,
+      dados,
+      req.usuario ? req.usuario.id : null
+    );
+
+    res.status(200).json(utenteAtualizado);
+  } catch (error) {
+    console.error('Erro ao editar utente:', error);
+    res.status(400).json({ error: error.message });
+  }
+}
+
+
+
+module.exports = { criarUtente, loginUtente, listarUtentes,listarPerfil, eliminarUtente, editarUtente };
 

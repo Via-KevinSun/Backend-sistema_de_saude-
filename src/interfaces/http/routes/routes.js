@@ -2,30 +2,55 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middlewares/authMiddleware');
 const authMiddlewareUtente = require('../middlewares/authMiddlewareUtente');
-const { criarUsuario, login } = require('../controllers/usuarioController');
-const { criarUtente, loginUtente, listarUtentes,listarPerfil  } = require('../controllers/utenteController');
-const { processarTriagem } = require('../controllers/triagemController');
-const { agendarTeleconsulta } = require('../controllers/consultaController');
-const { gerarPrescricao } = require('../controllers/prescricaoController');
+const { criarUsuario, login, eliminarUsuario } = require('../controllers/usuarioController');
+const { criarUtente, loginUtente, listarUtentes, listarPerfil, eliminarUtente, editarUtente } = require('../controllers/utenteController');
+const { processarTriagem, listarTriagens  } = require('../controllers/triagemController');
+const { agendarTeleconsulta, listarConsultas } = require('../controllers/consultaController');
+const { gerarPrescricao, listarPrescricoes } = require('../controllers/prescricaoController');
 const { monitorarLeituraClinica } = require('../controllers/leituraClinicaController');
 const { gerarRelatorioVigilancia } = require('../controllers/relatorioVigilanciaController');
 
 // Rotas de Usuário
 router.post('/usuarios',authMiddleware(['gestor']), criarUsuario); // Apenas gestores criam usuários
+
+//Gestor eliminar usuarios
+router.delete('/usuarios/:id', authMiddleware(['gestor']), eliminarUsuario);
+
+
 router.post('/usuarios/login', login); // Login aberto
 
-
 // Rotas de Utente
-//router.post('/utentes', authMiddleware(['agente', 'enfermeiro', 'medico', 'gestor']), criarUtente);
+router.post('/cadUtente', authMiddleware(['agente', 'enfermeiro', 'medico', 'gestor']), criarUtente);
 
 // Rotas de Triagem
-router.post('/triagens', authMiddleware(['agente', 'enfermeiro', 'medico']), processarTriagem);
+router.post('/triagens', processarTriagem);
+
+//Listar triagens
+router.get(
+  '/triagens',
+  authMiddleware(['agente', 'enfermeiro', 'medico', 'gestor']),
+  listarTriagens
+);
 
 // Rotas de Consulta
-router.post('/consultas', authMiddleware(['agente', 'enfermeiro', 'medico', 'gestor']), agendarTeleconsulta);
+router.post('/consultas', authMiddleware(['agente', 'enfermeiro', 'medico']), agendarTeleconsulta);
+
+router.get(
+  '/consultas',
+  authMiddleware(['agente', 'enfermeiro', 'medico', 'gestor']),
+  listarConsultas
+);
 
 // Rotas de Prescrição
 router.post('/prescricoes', authMiddleware(['medico']), gerarPrescricao); // Apenas médicos criam prescrições
+
+//listar prescricoes
+router.get(
+  '/prescricoes',
+  authMiddleware(['medico', 'gestor']),
+  listarPrescricoes
+);
+
 
 // Rotas de Leitura Clínica
 router.post('/leituras-clinicas', authMiddleware(['agente', 'enfermeiro', 'medico']), monitorarLeituraClinica);
@@ -38,8 +63,13 @@ router.post('/relatorios/vigilancia', authMiddleware(['gestor']), gerarRelatorio
 //Cadastro de um utente ao sistema
 router.post('/utentes', criarUtente);
 
+/*Eliminar utente rota disponivel para o gestor*/
+router.delete('/utentes/:id', authMiddleware(['gestor']), eliminarUtente);
 //login do utente
 router.post('/Utentes/login', loginUtente);
+
+/*Editar utente */
+router.put('/utentes/:id', authMiddleware(['gestor']), editarUtente);
 
 //Usuario listar utentes
 /*Essa rota permite que apenas medicos e gestor liste todos os Utentes*/

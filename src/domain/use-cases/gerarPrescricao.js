@@ -45,4 +45,6 @@ class GerarPrescricao {
   }
 }
 
+
+
 module.exports = GerarPrescricao;
