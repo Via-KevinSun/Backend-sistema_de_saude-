@@ -1,21 +1,19 @@
-const IUsuarioRepository = require('../../interfaces/repositories/iUsuarioRepository');
-const { prisma } = require('../../config/database');
-
+// src/infrastructure/repositories/usuarioRepository.js
+const IUsuarioRepository = require("../../interfaces/repositories/iUsuarioRepository");
+const { prisma } = require("../../config/database");
 
 class UsuarioRepository extends IUsuarioRepository {
   async create(usuario) {
-    // Encriptar a senha antes de salvar
-    // const senhaEncriptada = await bcrypt.hash(usuario.senha, 10);
     return await prisma.usuario.create({
       data: {
         id: usuario.id,
         nome: usuario.nome,
         email: usuario.email,
-        senha: usuario.senha,
+        senha: usuario.senha, // Já vem hasheada do use case
         papel: usuario.papel,
         mfaSecret: usuario.mfaSecret,
-        criadoEm: usuario.criadoEm
-      }
+        criadoEm: usuario.criadoEm,
+      },
     });
   }
 
@@ -24,7 +22,33 @@ class UsuarioRepository extends IUsuarioRepository {
   }
 
   async findById(id) {
-    return await prisma.usuario.findUnique({ where: { id } });
+    return await prisma.usuario.findUnique({ 
+      where: { id },
+      select: { id: true, nome: true, email: true, papel: true, criadoEm: true }
+    });
+  }
+
+  async findByPapel(papel) {
+    return await prisma.usuario.findMany({ where: { papel } });
+  }
+
+  async findAll() {
+    return await prisma.usuario.findMany({
+      select: { id: true, nome: true, email: true, papel: true, criadoEm: true },
+      orderBy: { criadoEm: 'desc' }
+    });
+  }
+
+  async update(id, data) {
+    return await prisma.usuario.update({
+      where: { id },
+      data,
+      select: { id: true, nome: true, email: true, papel: true }
+    });
+  }
+
+  async delete(id) {
+    return await prisma.usuario.delete({ where: { id } });
   }
 }
 

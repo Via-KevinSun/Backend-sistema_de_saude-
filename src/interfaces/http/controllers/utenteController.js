@@ -1,16 +1,21 @@
 const CriarUtente = require('../../../domain/use-cases/criarUtente');
 const UtenteRepository = require('../../../infrastructure/repositories/utenteRepository');
 const AuditoriaRepository = require('../../../infrastructure/repositories/auditoriaRepository');
+
+const AtualizarUtente = require('../../../domain/use-cases/atualizarUtente');
+const ExcluirUtente = require('../../../domain/use-cases/excluirUtente');
+
 // const Utente = require('../../../domain/entities/Utente');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken'); 
 
-
-
-
 const utenteRepository = new UtenteRepository();
 const auditoriaRepository = new AuditoriaRepository();
 const criarUtenteUseCase = new CriarUtente({ utenteRepository, auditoriaRepository });
+
+const atualizarUtenteUseCase = new AtualizarUtente({ utenteRepository, auditoriaRepository });
+const excluirUtenteUseCase = new ExcluirUtente({ utenteRepository, auditoriaRepository });
+
 //Cadastro de um Utente
 async function criarUtente(req, res) {
   try {
@@ -88,6 +93,45 @@ async function listarPerfil(req, res) {
   }
 }
 
+// === BUSCAR POR ID ===
+async function buscarUtente(req, res) {
+  try {
+    const { id } = req.params;
+    const utente = await utenteRepository.findById(id);
+    if (!utente) return res.status(404).json({ error: 'Utente não encontrado' });
+    res.json(utente);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao buscar utente' });
+  }
+}
 
-module.exports = { criarUtente, loginUtente, listarUtentes,listarPerfil  };
+// === ATUALIZAR ===
+async function atualizarUtente(req, res) {
+  try {
+    const { id } = req.params;
+    const dados = req.body;
+    dados.id = id;
+
+    const utente = await atualizarUtenteUseCase.execute(dados, req.usuario.id);
+    res.json(utente);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}
+
+// === EXCLUIR ===
+async function excluirUtente(req, res) {
+  try {
+    const { id } = req.params;
+    await excluirUtenteUseCase.execute(id, req.usuario.id);
+    res.json({ message: 'Utente excluído com sucesso' });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}
+
+module.exports = { 
+  criarUtente, loginUtente, listarUtentes, listarPerfil,
+  buscarUtente, atualizarUtente, excluirUtente 
+};
 

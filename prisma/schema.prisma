@@ -54,6 +54,7 @@ model Consulta {
   data           DateTime
   resumo         String?
   prescricaoId   String?     @unique // Para relação 1:1 com Prescricao
+  realizada      Boolean     @default(false)
   utente         Utente      @relation(fields: [utenteId], references: [id])
   prescricao     Prescricao? @relation // Relação 1:1 (sem fields/references aqui)
 }

@@ -42,7 +42,10 @@ class AgendarTeleconsulta {
     await this.auditoriaRepository.create(auditoria);
 
     return createdConsulta;
+
   }
+
+  
 }
 
 module.exports = AgendarTeleconsulta;

@@ -1,5 +1,5 @@
-const IConsultaRepository = require('../../interfaces/repositories/iConsultaRepository');
-const { prisma } = require('../../config/database');
+const IConsultaRepository = require("../../interfaces/repositories/iConsultaRepository");
+const { prisma } = require("../../config/database");
 
 class ConsultaRepository extends IConsultaRepository {
   async create(consulta) {
@@ -11,8 +11,8 @@ class ConsultaRepository extends IConsultaRepository {
         tipo: consulta.tipo,
         data: consulta.data,
         resumo: consulta.resumo,
-        prescricaoId: consulta.prescricaoId
-      }
+        prescricaoId: consulta.prescricaoId,
+      },
     });
   }
 
@@ -23,23 +23,47 @@ class ConsultaRepository extends IConsultaRepository {
   async update(id, data) {
     return await prisma.consulta.update({
       where: { id },
-      data
+      data,
     });
   }
 
   async verificarDisponibilidade(profissionalId, data) {
-    // Lógica simplificada: verificar se há consulta no mesmo horário
+    if (!profissionalId) return true; // Se não tem médico, permite (alocação automática)
+
     const consultaExistente = await prisma.consulta.findFirst({
       where: {
         profissionalId,
-        data
-      }
+        data: {
+          gte: new Date(data),
+          lt: new Date(new Date(data).getTime() + 1000), // mesma segunda
+        },
+      },
     });
-    return !consultaExistente; // Retorna true se disponível
+    return !consultaExistente;
   }
 
   async findUtenteById(utenteId) {
     return await prisma.utente.findUnique({ where: { id: utenteId } });
+  }
+
+  async findByDate(date) {
+    const startOfDay = new Date(date);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return await prisma.consulta.findMany({
+      where: {
+        data: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+      },
+      include: {
+        utente: {
+          select: { id: true, nome: true, contacto: true },
+        },
+      },
+    });
   }
 }
 

@@ -1,5 +1,5 @@
-const ITriagemRepository = require('../../interfaces/repositories/iTriagemRepository');
-const { prisma } = require('../../config/database');
+const ITriagemRepository = require("../../interfaces/repositories/iTriagemRepository");
+const { prisma } = require("../../config/database");
 
 class TriagemRepository extends ITriagemRepository {
   async create(triagem) {
@@ -10,8 +10,8 @@ class TriagemRepository extends ITriagemRepository {
         respostasJson: triagem.respostasJson,
         resultado: triagem.resultado,
         recomendacao: triagem.recomendacao,
-        data: triagem.data
-      }
+        data: triagem.data,
+      },
     });
   }
 
@@ -25,9 +25,35 @@ class TriagemRepository extends ITriagemRepository {
         utente: { idLocal: zonaId },
         data: {
           gte: new Date(periodoInicio),
-          lte: new Date(periodoFim)
-        }
-      }
+          lte: new Date(periodoFim),
+        },
+      },
+    });
+  }
+
+  // Adicione
+  async findAll() {
+    return await prisma.triagem.findMany({
+      include: {
+        utente: {
+          select: { zona: true },
+        },
+      },
+    });
+  }
+
+  async findByDate(data) {
+    const startOfDay = new Date(data);
+    const endOfDay = new Date(data);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return await prisma.triagem.findMany({
+      where: {
+        data: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+      },
     });
   }
 }
