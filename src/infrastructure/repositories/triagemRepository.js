@@ -75,6 +75,15 @@ class TriagemRepository extends ITriagemRepository {
       }
     });
   }
+
+  async groupByZona() {
+  return await prisma.triagem.groupBy({
+    by: ['zona'],
+    _count: { zona: true },
+    orderBy: { _count: { zona: 'desc' } }
+  });
+}
+
 }
 
 module.exports = TriagemRepository;

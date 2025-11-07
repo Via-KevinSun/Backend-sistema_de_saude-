@@ -12,8 +12,15 @@ app.use(cors({
   credentials: true,
 }));
 
+const dashboardRoutes = require('./interfaces/http/routes/dashboardRoutes');
 const routes = require('./interfaces/http/routes/routes');
+
+
+app.use(dashboardRoutes);
 app.use(routes);
+
+//app.use(rotas);
+
 
 app.listen(port, () => {
   console.log(`Servidor rodando na porta ${port}`);

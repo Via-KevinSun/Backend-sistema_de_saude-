@@ -3,22 +3,29 @@ const express = require("express");
 const router = express.Router();
 const authMiddleware = require('../middlewares/authMiddleware');
 const authMiddlewareUtente = require('../middlewares/authMiddlewareUtente');
-const { criarUsuario, login, eliminarUsuario } = require('../controllers/usuarioController');
+const { login, eliminarUsuario, criarUsuario, listarUsuarios, listarMedicos} = require('../controllers/usuarioController');
 const { criarUtente, loginUtente, listarUtentes, listarPerfil, eliminarUtente, editarUtente } = require('../controllers/utenteController');
 const { processarTriagem, listarTriagens  } = require('../controllers/triagemController');
 const { agendarTeleconsulta, listarConsultas } = require('../controllers/consultaController');
 const { gerarPrescricao, listarPrescricoes } = require('../controllers/prescricaoController');
 const { monitorarLeituraClinica } = require('../controllers/leituraClinicaController');
 const { gerarRelatorioVigilancia } = require('../controllers/relatorioVigilanciaController');
+const { listarZonas } = require("../controllers/zonaController");
+const { route } = require("./dashboardRoutes");
 
 // Rotas de Usuário
 router.post('/usuarios',authMiddleware(['gestor']), criarUsuario); // Apenas gestores criam usuários
+
+//Listar Usuario
+router.get('/usuarios', authMiddleware(['gestor']),listarUsuarios);
 
 //Gestor eliminar usuarios
 router.delete('/usuarios/:id', authMiddleware(['gestor']), eliminarUsuario);
 
 
 router.post('/usuarios/login', login); // Login aberto
+
+router.get('/usuarios/medico', authMiddleware(['gestor']), listarMedicos);
 
 // Rotas de Utente
 router.post('/cadUtente', authMiddleware(['agente', 'enfermeiro', 'medico', 'gestor']), criarUtente);
@@ -74,10 +81,13 @@ router.put('/utentes/:id', authMiddleware(['gestor']), editarUtente);
 
 //Usuario listar utentes
 /*Essa rota permite que apenas medicos e gestor liste todos os Utentes*/
-router.get('/utentes', authMiddleware(['gestor','medico']),listarUtentes);
+router.get('/utentes', authMiddleware(['gestor','medico','enfermeiro']),listarUtentes);
 
 /*Essa rota permite que um utente veja os seus proprios dados*/
 router.get('/utentes/me', authMiddlewareUtente, listarPerfil);
+
+/*ZONAS */
+router.get("/zonas", listarZonas);
 
 
 // Rota raiz

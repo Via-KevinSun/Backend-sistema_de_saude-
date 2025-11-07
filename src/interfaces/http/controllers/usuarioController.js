@@ -95,4 +95,89 @@ async function eliminarUsuario(req, res) {
   }
 }
 
-module.exports = { criarUsuario, login, eliminarUsuario };
+// === CRIAR USUÁRIO ===
+async function criarUsuario(req, res) {
+  try {
+    const { nome, email, senha, papel } = req.body;
+
+    // validação básica
+    if (!nome || !email || !senha || !papel) {
+      return res.status(400).json({ error: "Preencha todos os campos obrigatórios." });
+    }
+
+    // verifica se o e-mail já existe
+    const existente = await usuarioRepository.findByEmail(email);
+    if (existente) {
+      return res.status(400).json({ error: "E-mail já cadastrado." });
+    }
+
+    // criptografa a senha
+    const senhaHash = await bcrypt.hash(senha, 10);
+
+    // cria o usuário
+    const novoUsuario = await usuarioRepository.create({
+      nome,
+      email,
+      senha: senhaHash,
+      papel,
+    });
+
+    // registra auditoria
+    await auditoriaRepository.create({
+      id: require("crypto").randomUUID(),
+      entidade: "Usuario",
+      entidadeId: novoUsuario.id,
+      acao: "create",
+      userId: req.usuario ? req.usuario.id : null,
+      detalhe: `Usuário ${novoUsuario.nome} criado.`,
+    });
+
+    res.status(201).json({
+      message: "Usuário criado com sucesso",
+      usuario: {
+        id: novoUsuario.id,
+        nome: novoUsuario.nome,
+        email: novoUsuario.email,
+        papel: novoUsuario.papel,
+      },
+    });
+  } catch (error) {
+    console.error("Erro ao criar usuário:", error);
+    res.status(500).json({ error: "Erro ao criar usuário" });
+  }
+}
+
+async function listarUsuarios(req, res) {
+  try {
+    // Verificar se o usuário logado é gestor
+    if (!req.usuario || req.usuario.papel !== 'gestor') {
+      return res.status(403).json({ error: 'Acesso negado' });
+    }
+
+    const usuarios = await usuarioRepository.findAll();
+    
+    res.json({ usuarios });
+  } catch (error) {
+    console.error('Erro ao listar usuários:', error);
+    res.status(500).json({ error: 'Erro ao listar usuários' });
+  }
+}
+
+async function listarMedicos(req, res) {
+  try {
+
+    if (!req.usuario || req.usuario.papel !== 'gestor') {
+      return res.status(403).json({ error: 'Acesso negado' });
+    }
+    
+    const medicos = await usuarioRepository.findByPapel('medico');
+
+    res.json({ medicos });
+  } catch (err) {
+    console.error("Erro ao listar médicos:", err);
+    res.status(500).json({ error: "Erro ao listar médicos" });
+  }
+}
+
+
+module.exports = {login, eliminarUsuario, criarUsuario, listarUsuarios, listarMedicos};

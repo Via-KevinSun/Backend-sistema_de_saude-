@@ -55,6 +55,34 @@ class ConsultaRepository extends IConsultaRepository {
       orderBy: { data: 'desc' }
     });
   }
+
+  async countByDate(date) {
+  const start = new Date(date.setHours(0, 0, 0, 0));
+  const end = new Date(date.setHours(23, 59, 59, 999));
+
+  return await prisma.consulta.count({
+    where: {
+      dataConsulta: {
+        gte: start,
+        lte: end
+      }
+    }
+  });
+}
+
+  async findByDate(dataStr) {
+    // dataStr deve estar no formato 'YYYY-MM-DD'
+    return await prisma.consulta.findMany({
+      where: {
+        data: {
+          gte: new Date(`${dataStr}T00:00:00.000Z`),
+          lte: new Date(`${dataStr}T23:59:59.999Z`),
+        },
+      },
+    });
+  }
+
+
 }
 
 module.exports = ConsultaRepository;

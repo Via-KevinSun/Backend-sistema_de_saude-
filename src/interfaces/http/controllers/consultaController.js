@@ -24,22 +24,6 @@ async function listarConsultasHoje(req, res) {
   }
 }
 
-async function estatisticasConsultas(req, res) {
-  try {
-    const resultado = [];
-    for (let i = 6; i >= 0; i--) {
-      const data = new Date();
-      data.setDate(data.getDate() - i);
-      const dataStr = data.toISOString().split('T')[0];
-      const consultas = await consultaRepository.findByDate(dataStr);
-      resultado.push({ data: dataStr, total: consultas.length });
-    }
-    res.json(resultado);
-  } catch (error) {
-    console.error('Erro em estatisticasConsultas:', error);
-    res.status(500).json({ error: 'Erro ao gerar estatísticas' });
-  }
-}
 
 // === FUNÇÃO PRINCIPAL ===
 async function agendarTeleconsulta(req, res) {
@@ -65,4 +49,31 @@ async function listarConsultas(req, res) {
   }
 }
 
-module.exports = { agendarTeleconsulta, listarConsultas };
+async function estatisticasConsultasPorData(req, res) {
+  try {
+    const resultado = [];
+
+    for (let i = 6; i >= 0; i--) {
+      const data = new Date();
+      data.setDate(data.getDate() - i);
+
+      // Formata para 'YYYY-MM-DD' para buscar no banco
+      const dataStr = data.toISOString().split('T')[0];
+
+      // Consulta todas as consultas daquele dia
+      const consultas = await consultaRepository.findByDate(dataStr);
+
+      resultado.push({
+        data: dataStr,           // data do dia
+        total: consultas.length, // total de consultas naquele dia
+      });
+    }
+
+    res.json(resultado);
+  } catch (error) {
+    console.error("Erro em estatisticasConsultasPorData:", error);
+    res.status(500).json({ error: "Erro ao gerar estatísticas por data" });
+  }
+}
+
+module.exports = { agendarTeleconsulta, listarConsultas, estatisticasConsultasPorData};

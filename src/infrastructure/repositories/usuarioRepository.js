@@ -21,6 +21,22 @@ class UsuarioRepository extends IUsuarioRepository {
     return await prisma.usuario.findUnique({ where: { email } });
   }
 
+  // Dentro da classe UsuarioRepository
+
+async findByPapel(papel) {
+  return await prisma.usuario.findMany({
+    where: { papel }, // filtra pelo papel fornecido
+    select: {
+      id: true,
+      nome: true,
+      email: true,
+      papel: true,
+      criadoEm: true,
+    },
+    orderBy: { nome: 'asc' }, 
+  });
+}
+
   async findById(id) {
     return await prisma.usuario.findUnique({ 
       where: { id },

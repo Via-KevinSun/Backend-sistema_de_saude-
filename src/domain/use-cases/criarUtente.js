@@ -1,3 +1,4 @@
+// src/domain/use-cases/criarUtente.js
 const Utente = require("../entities/Utente");
 const Auditoria = require("../entities/Auditoria");
 const bcrypt = require("bcrypt");
@@ -8,14 +9,15 @@ class CriarUtente {
     this.auditoriaRepository = auditoriaRepository;
   }
 
-  async execute(
-    { nome, dataNascimento, sexo, contacto, localizacao, idLocal, senha },
-    userId
-  ) {
+  async execute({ nome, dataNascimento, sexo, contacto, localizacao, idLocal, senha }, userId) {
+    // Verifica se a zona existe
+    const zona = await this.utenteRepository.findZonaById(idLocal);
+    if (!zona) throw new Error("Zona inválida");
+
     const hashedSenha = senha ? await bcrypt.hash(senha, 10) : null;
-    // Criar entidade Utente com validações
+
     const utente = new Utente({
-      id: require("crypto").randomUUID(), // Gera UUID para o ID
+      id: require("crypto").randomUUID(),
       nome,
       dataNascimento,
       sexo,
@@ -25,10 +27,9 @@ class CriarUtente {
       senha: hashedSenha,
     });
 
-    // Salvar no repositório
     const createdUtente = await this.utenteRepository.create(utente);
 
-    // Registrar auditoria
+    // Auditoria
     const auditoria = new Auditoria({
       id: require("crypto").randomUUID(),
       entidade: "Utente",
@@ -39,10 +40,7 @@ class CriarUtente {
     });
     await this.auditoriaRepository.create(auditoria);
 
-    const zona = await this.utenteRepository.findZonaById(idLocal);
-    if (!zona) throw new Error("Zona inválida");
-
-    return createdUtente;
+    return createdUtente; // Retorna utente já com zona
   }
 }
 

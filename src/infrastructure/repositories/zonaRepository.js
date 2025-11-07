@@ -12,6 +12,15 @@ class ZonaRepository {
     });
   }
 
+  // async findAll() {
+  //   return await prisma.zona.findMany({
+  //     select: {
+  //       id: true,
+  //       nome: true,
+  //     },
+  //   });
+  // }
+
   async findById(id) {
     return await prisma.zona.findUnique({ where: { id } });
   }
@@ -30,6 +39,8 @@ class ZonaRepository {
       select: { id: true, nome: true },
     });
   }
+
+  
 }
 
 module.exports = ZonaRepository;
