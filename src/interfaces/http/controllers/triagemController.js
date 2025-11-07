@@ -1,13 +1,17 @@
+// src/interfaces/http/controllers/triagemController.js
+const { prisma } = require('../../../config/database');
 const ProcessarTriagem = require('../../../domain/use-cases/processarTriagem');
 const ListarTriagens = require('../../../domain/use-cases/listarTriagens');
 const TriagemRepository = require('../../../infrastructure/repositories/triagemRepository');
 const AuditoriaRepository = require('../../../infrastructure/repositories/auditoriaRepository');
 
-const triagemRepository = new TriagemRepository();
+// Instâncias
 const auditoriaRepository = new AuditoriaRepository();
+const triagemRepository = new TriagemRepository(); // <-- Use apenas UMA vez
 const processarTriagemUseCase = new ProcessarTriagem({ triagemRepository, auditoriaRepository });
 const listarTriagensUseCase = new ListarTriagens({ triagemRepository });
 
+// Função principal de triagem
 async function processarTriagem(req, res) {
   try {
     const { utenteId, respostasJson } = req.body;

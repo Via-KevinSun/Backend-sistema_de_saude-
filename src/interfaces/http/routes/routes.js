@@ -1,4 +1,5 @@
-const express = require('express');
+// src/interfaces/http/routes/routes.js
+const express = require("express");
 const router = express.Router();
 const authMiddleware = require('../middlewares/authMiddleware');
 const authMiddlewareUtente = require('../middlewares/authMiddlewareUtente');

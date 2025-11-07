@@ -2,6 +2,10 @@ const CriarUtente = require('../../../domain/use-cases/criarUtente');
 const EditarUtente = require('../../../domain/use-cases/editarUtente');
 const UtenteRepository = require('../../../infrastructure/repositories/utenteRepository');
 const AuditoriaRepository = require('../../../infrastructure/repositories/auditoriaRepository');
+
+const AtualizarUtente = require('../../../domain/use-cases/atualizarUtente');
+const ExcluirUtente = require('../../../domain/use-cases/excluirUtente');
+
 // const Utente = require('../../../domain/entities/Utente');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken'); 

@@ -1,6 +1,5 @@
-const IUtenteRepository = require('../../interfaces/repositories/iUtenteRepository');
-const { prisma } = require('../../config/database');
-
+const IUtenteRepository = require("../../interfaces/repositories/iUtenteRepository");
+const { prisma } = require("../../config/database");
 
 class UtenteRepository extends IUtenteRepository {
   async create(utente) {
@@ -13,8 +12,8 @@ class UtenteRepository extends IUtenteRepository {
         contacto: utente.contacto,
         localizacao: utente.localizacao,
         idLocal: utente.idLocal,
-        senha: utente.senha
-      }
+        senha: utente.senha,
+      },
     });
   }
 
@@ -23,8 +22,8 @@ class UtenteRepository extends IUtenteRepository {
   }
 
   async findByContacto(contacto) {
-  return await prisma.utente.findUnique({ where: { contacto } });
-}
+    return await prisma.utente.findUnique({ where: { contacto } });
+  }
 
   async findAll() {
     return await prisma.utente.findMany({
@@ -37,9 +36,9 @@ class UtenteRepository extends IUtenteRepository {
         localizacao: true,
         idLocal: true,
         zona: {
-          select: { nome: true }
-        }
-      }
+          select: { nome: true },
+        },
+      },
     });
   }
 
